@@ -5,5 +5,23 @@
 {% endblock %}
 
 {% block content %}
+<form method="get">
+   <p><input type="search" class="mt-2" name="results" placeholder="Search user">
 
+</form>
+{% if  result_user  %}
+<div class="card" style="width: 18rem;">
+  <ul class="list-group list-group-flush">
+     <li class="list-group-item"><b>New User Found!</b></li>
+     <li class="list-group-item">{{ result_user.username }}</li>
+     <li class="list-group-item">{{ result_user.first_name }}</li>
+     <li class="list-group-item">{{ result_user.last_name }}</li>
+     <li class="list-group-item">{{ result_user.age }}</li>
+     <li class="list-group-item">{{ result_user.job }}</li>
+  </ul>
+</div>
+<form method="get">
+<button class="mt-2" name="add-friend-btn" value=" {{ result_user.username }}" type="submit">Add friend</button>
+</form>
+{% endif %}
 {%endblock%}

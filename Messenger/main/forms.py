@@ -7,7 +7,6 @@ class CreateUserForm(UserCreationForm):
 		model = User
 		fields = ['username' , 'email', 'password1', 'password2']
 
-
 class InputForm(Form):
 	username = forms.CharField(max_length=100)
 	first_name = forms.CharField(max_length=200)
@@ -15,3 +14,6 @@ class InputForm(Form):
 	age = forms.IntegerField()
 	job = forms.CharField(max_length=200)
 
+
+class SearchForm(Form):
+	search = forms.CharField(max_length=100)

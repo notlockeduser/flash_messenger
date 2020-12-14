@@ -2,10 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .forms import CreateUserForm, InputForm
+from .forms import CreateUserForm, InputForm, SearchForm
 from .models import UserInfo
-
-
 from django.contrib import messages
 
 from django.contrib.auth import authenticate, login, logout
@@ -18,11 +16,8 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     context = {}
     user = request.user
-    this_user = UserInfo.objects.get(username = user)
-    for i in range(len(UserInfo.objects.all())):
-        print(UserInfo.objects.all()[i].username)
-    context['this_user']=this_user
-    context["text"] = "Hello MotherFucker"
+    this_user = UserInfo.objects.get(username=user)
+    context['this_user'] = this_user
     return render(request, 'main/index.html', context)
 
 @login_required(login_url = 'login')
@@ -32,13 +27,48 @@ def about(request):
 
 @login_required(login_url = 'login')
 def friends(request):
-    return render(request, 'main/friends.html')
+    context = {}
+    user = request.user
+    this_user = UserInfo.objects.get(username=user)
+    friends = this_user.friends
+    print('My friends: ', friends.split(' '))
+    friends_array = friends.split(' ')
+    i = 1
+    friends_objects_array = []
+    while (i < len(friends_array)):
+        friends_objects_array.append(UserInfo.objects.get(username = friends_array[i]))
+        i = i + 1
+    context['friends'] = friends_objects_array
+    print(friends_objects_array)
+    return render(request, 'main/friends.html', context)
 
 
 @login_required(login_url = 'login')
 def users(request):
     context = {}
+    user = request.user
+    this_user = UserInfo.objects.get(username=user)
+    context["this_user"] = this_user
+    inp_value = request.GET.get('results', '')
+    print("Input value: ", inp_value)
+    inp_value = str(inp_value)
 
+    objects = UserInfo.objects.all()
+    flag = 0
+    for i in range(len(objects)):
+        if (inp_value == objects[i].username):
+            context['result_user'] = objects[i]
+            flag = 1
+            break
+    name = request.GET.get('add-friend-btn','')
+
+    if name:
+        if not (name in this_user.friends):
+            new_name = str(this_user.friends) + name
+            print("You already this friend")
+            this_user.friends = new_name
+            this_user.save()
+        else : print("You already have this friend")
     return render(request, 'main/users.html', context)
 
 

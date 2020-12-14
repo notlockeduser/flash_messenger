@@ -704,8 +704,7 @@ Website: http://emilcarlsson.se/
 	<div id="sidepanel">
 		<div id="profile">
 			<div class="wrap">
-				<img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
-				<p>{{ username }}</p>
+				<p>{{ user }}</p>
 				<i class="fa fa-chevron-down expand-button" aria-hidden="true"></i>
 				<div id="status-options">
 					<ul>
@@ -726,47 +725,27 @@ Website: http://emilcarlsson.se/
 			</div>
 		</div>
 		<div id="search">
-			<label for=""><i class="fa fa-search" aria-hidden="true"></i></label>
-			<input type="text" placeholder="Search contacts..." />
+
 		</div>
 		<div id="contacts">
-			<ul>
-				<li class="contact">
-					<div class="wrap">
-						<span class="contact-status online"></span>
-						<img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
-						<div class="meta">
-							<p class="name">Louis Litt</p>
-							<p class="preview">You just got LITT up, Mike.</p>
-						</div>
-					</div>
-				</li>
-				<li class="contact active">
-					<div class="wrap">
-						<span class="contact-status busy"></span>
-						<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-						<div class="meta">
-							<p class="name">Harvey Specter</p>
-							<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-						</div>
-					</div>
-				</li>
+			<ul id="add_contact">
+				<br>
+				<p class="ml-5">Contacts here:</p>
+				<br>
+			{% for contact in contacts %}
+				<br>
+				<p class ="ml-5 text-primary">{{contact}}</p>
+				<br>
+			{% endfor %}
 			</ul>
 		</div>
-		<div id="bottom-bar">
-			<button id="addcontact"><i class="fa fa-user-plus fa-fw" aria-hidden="true"></i> <span>Add contact</span></button>
-			<button id="settings"><i class="fa fa-cog fa-fw" aria-hidden="true"></i> <span>Settings</span></button>
-		</div>
+
 	</div>
 	<div class="content">
 		<div class="contact-profile">
-			<img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-			<p> {{ username }}</p>
-			<div class="social-media">
-				<i class="fa fa-facebook" aria-hidden="true"></i>
-				<i class="fa fa-twitter" aria-hidden="true"></i>
-				 <i class="fa fa-instagram" aria-hidden="true"></i>
-			</div>
+
+			<p> &nbsp; &nbsp; {{ user }}</p>
+
 		</div>
 		<div class="messages">
 			<ul id = "chat-log">
@@ -782,35 +761,101 @@ Website: http://emilcarlsson.se/
 		</div>
 	</div>
 </div>
-<script src='//production-assets.codepen.io/assets/common/stopExecutionOnTimeout-b2a7b3fe212eaa732349046d8416e00a9dec26eb7fd347590fbced3ab38af52e.js'></script><script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
-
+<script src='//production-assets.codepen.io/assets/common/stopExecutionOnTimeout-b2a7b3fe212eaa732349046d8416e00a9dec26eb7fd347590fbced3ab38af52e.js'></script>
+<script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
 <script>
+
 	var roomName = {{ room_name_json }}
 	var username = {{ username }}
-
+	var usable = {{ array_history }}
 	var chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
-	var items_receive = []
-	var items_send = []
-	chatSocket.onopen = function() {
-  		alert("Соединение установлено.");
-	};
+	var flag = parseInt(localStorage.getItem('flag'))||0;
+	function clearMessages(){
+		var count = parseInt(localStorage.getItem('size'));
+		for (var i=1; i<=count; i++){
+			localStorage.removeItem('message-' + i);
+			localStorage.removeItem('author-' + i);
+			localStorage.removeItem('className-' + i);
+		}
+	localStorage.removeItem('size');
+	}
 
+	function addMessage(message, author, className){
+		var count = parseInt(localStorage.getItem('size'))||0;
+		localStorage.setItem('message-' + (count + 1), message);
+		localStorage.setItem('author-' + (count + 1), author);
+		localStorage.setItem('className-' + (count + 1), className);
+		localStorage.setItem('size', (count + 1));
+	}
+
+	function getMessages(){
+		var items = [];
+		var count = parseInt(localStorage.getItem('size'))||0;
+		for (var i = 1; i<=count; i++){
+			var id_message = localStorage.getItem('message-' + i);
+			var id_author = localStorage.getItem('author-' + i);
+			var id_className = localStorage.getItem('className-' + i);
+			items.push(id_message);
+			items.push(id_author);
+			items.push(id_className);
+		}
+		return items;
+	}
+	function getContacts(){
+		var items = []
+		var count = parseInt(localStorage.getItem('contact_numbers'))||0;
+		for (var i=1; i<=count; i++){
+			var id_contact_name = localStorage.getItem('contact-' + i);
+			var id_contact_img = localStorage.getItem('contact_img-' + i);
+			items.push(id_contact_name);
+			items.push(id_contact_img);
+		}
+		return items;
+	}
+
+	chatSocket.onopen = function() {
+
+  		alert("Соединение установлено.");
+  		items = getMessages();
+  		size = localStorage.getItem('size');
+  		var message;
+  		var author;
+  		var className;
+  		for (var i = 0; i<size*3; i=i+3){
+  				message = items[i];
+  				author = items[i + 1];
+  				className = items[i + 2];
+  				var msgListTag = document.createElement('li');
+  				var pTag = document.createElement('p');
+  				var nick = document.createElement('p');
+  				nick.className = "mr-2 ml-2 text-info";
+  				pTag.textContent = message;
+  				nick.textContent =  author ;
+  				msgListTag.className = className;
+  				msgListTag.appendChild(nick);
+				msgListTag.appendChild(pTag);
+				document.querySelector('#chat-log').appendChild(msgListTag);
+  		}
+
+	};
 	chatSocket.onmessage = function(e){
 		var data = JSON.parse(e.data);
 		var message = data['message'];
 		var author = message['author'];
 		var msgListTag = document.createElement('li');
-		var imgTag = document.createElement('img');
+		var nick = document.createElement('p');
+		nick.className = "mr-2 ml-2 text-info";
 		var pTag = document.createElement('p');
 		pTag.textContent = message.content;
-		imgTag.src = 'http://emilcarlsson.se/assets/harveyspecter.png';
+		nick.textContent = author;
 		if (author == username){
 			msgListTag.className = 'sent';
 		} else {
 			msgListTag.className = 'replies';
 		}
-		msgListTag.appendChild(imgTag);
+		msgListTag.appendChild(nick);
 		msgListTag.appendChild(pTag);
+		addMessage(message.content, author, msgListTag.className);
 		document.querySelector('#chat-log').appendChild(msgListTag);
 	};
 	chatSocket.onclose = function(e){
@@ -826,16 +871,14 @@ Website: http://emilcarlsson.se/
 	document.querySelector('#chat-message-submit').onclick = function(e){
 		var messageInputDom = document.getElementById('chat-message-input');
 		var message = messageInputDom.value;
-		var store = JSON.stringify({ 'message' : message, 'from' : username });
-		items_send.push(store);
 
 		chatSocket.send(JSON.stringify({
 			'command': 'new_message',
 			'message': message,
 			'from' : username
 		}));
+		addMessage(message, author , username);
 		messageInputDom.value = '';
 	};
-
 </script>
 </body></html>

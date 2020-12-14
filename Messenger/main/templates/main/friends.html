@@ -5,5 +5,18 @@
 {% endblock %}
 
 {% block content %}
-
+{% for friend in friends %}
+<br>
+<div class="card" style="width: 18rem;">
+  <ul class="list-group list-group-flush">
+     <li class="list-group-item">{{ friend.username }}</li>
+     <li class="list-group-item">{{ friend.first_name }}</li>
+     <li class="list-group-item">{{ friend.last_name }}</li>
+     <li class="list-group-item">{{ friend.age }}</li>
+     <li class="list-group-item">{{ friend.job }}</li>
+      <button type="button" class="btn btn-primary">Invite to chat</button>
+  </ul>
+</div>
+<br>
+{% endfor %}
 {%endblock%}
