@@ -39,6 +39,9 @@ padding-bottom: 50px;
         <li class="list-group-item">Job <b>{{this_user.job}}</b></li>
         <li class="list-group-item">Age <b>{{this_user.age}}</b></li>
     </ul>
+    {% if flag %}
+        <p class="text-primary">  You got invitation to room {{ room }}</p>
+    {% endif %}
 </div>
 <style>
     .card{

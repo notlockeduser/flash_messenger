@@ -5,12 +5,12 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import CreateUserForm, InputForm, SearchForm
 from .models import UserInfo
 from django.contrib import messages
-
 from django.contrib.auth import authenticate, login, logout
-
-
 from django.contrib.auth.decorators import login_required
 
+import redis
+pool = redis.ConnectionPool(host='localhost', port=6379, db=0)
+r = redis.Redis(connection_pool=pool)
 
 @login_required(login_url = 'login')
 def index(request):
@@ -18,6 +18,16 @@ def index(request):
     user = request.user
     this_user = UserInfo.objects.get(username=user)
     context['this_user'] = this_user
+    flag = 0
+    if r.get(this_user.username):
+        room = str(r.get(this_user.username))
+        length = len(room)
+        room = room[2:length-1]
+        print("You got invitation to room : ", room)
+        flag = 1
+        context['room'] = room
+        r.delete(user.username)
+    context['flag'] = flag
     return render(request, 'main/index.html', context)
 
 @login_required(login_url = 'login')
@@ -35,11 +45,17 @@ def friends(request):
     friends_array = friends.split(' ')
     i = 1
     friends_objects_array = []
+    invite = request.GET.get('invite-button', '')
+    room_name = request.GET.get('chat_room_name','')
+    if invite and room_name:
+        print('Invite button pushed : ', invite)
+        print('Chat room name: ', str(room_name))
+        r.set(invite, room_name)
     while (i < len(friends_array)):
         friends_objects_array.append(UserInfo.objects.get(username = friends_array[i]))
         i = i + 1
     context['friends'] = friends_objects_array
-    print(friends_objects_array)
+    context['this_user'] = this_user
     return render(request, 'main/friends.html', context)
 
 
@@ -52,7 +68,6 @@ def users(request):
     inp_value = request.GET.get('results', '')
     print("Input value: ", inp_value)
     inp_value = str(inp_value)
-
     objects = UserInfo.objects.all()
     flag = 0
     for i in range(len(objects)):
@@ -61,7 +76,6 @@ def users(request):
             flag = 1
             break
     name = request.GET.get('add-friend-btn','')
-
     if name:
         if not (name in this_user.friends):
             new_name = str(this_user.friends) + name

@@ -14,7 +14,10 @@
      <li class="list-group-item">{{ friend.last_name }}</li>
      <li class="list-group-item">{{ friend.age }}</li>
      <li class="list-group-item">{{ friend.job }}</li>
-      <button type="button" class="btn btn-primary">Invite to chat</button>
+      <form method="get">
+          <p><input type="text" class="mt-2" name="chat_room_name" placeholder="Enter chat room name">
+              <button name="invite-button" value="{{ friend.username }}" class="btn btn-primary" type="submit">Invite to chat {{ friend.username }}</button>
+      </form>
   </ul>
 </div>
 <br>
