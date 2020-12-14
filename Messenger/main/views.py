@@ -19,9 +19,11 @@ def index(request):
     context = {}
     user = request.user
     this_user = UserInfo.objects.get(username = user)
+    for i in range(len(UserInfo.objects.all())):
+        print(UserInfo.objects.all()[i].username)
     context['this_user']=this_user
+    context["text"] = "Hello MotherFucker"
     return render(request, 'main/index.html', context)
-
 
 @login_required(login_url = 'login')
 def about(request):
@@ -35,7 +37,9 @@ def friends(request):
 
 @login_required(login_url = 'login')
 def users(request):
-    return render(request, 'main/users.html')
+    context = {}
+
+    return render(request, 'main/users.html', context)
 
 
 #flag_registrate = False
@@ -100,3 +104,5 @@ def loginPage(request):
 
 def messages(request):
     return render(request, 'main/messages.html')
+
+

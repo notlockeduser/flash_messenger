@@ -1,6 +1,7 @@
 
-from django.urls import path
+from django.urls import path, include
 from . import views
+from chat.views import chat_func
 urlpatterns = [
     path('', views.index, name='home'),
     path('about-us', views.about, name='about'),
@@ -10,5 +11,6 @@ urlpatterns = [
     path('login', views.loginPage, name='login'),
     path('register', views.registerPage, name='register'),
     path('logout', views.logoutUser, name='logout'),
-    path('register_form', views.register_form, name='register_form')
+    path('register_form', views.register_form, name='register_form'),
+    path('chat', include('chat.urls', namespace='chat')),
 ]
